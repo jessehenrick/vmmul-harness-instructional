@@ -1,4 +1,8 @@
+#ifdef __APPLE__
+#include </Library/Developer/CommandLineTools/SDKs/MacOSX13.0.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers/cblas.h>
+#else
 #include <cblas.h>
+#endif
 
 const char* dgemv_desc = "Reference dgemv.";
 

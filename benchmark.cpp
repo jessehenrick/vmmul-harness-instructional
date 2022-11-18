@@ -15,8 +15,14 @@
 
 #include <cmath> // For: fabs
 
+#ifdef __APPLE__
+#include </Library/Developer/CommandLineTools/SDKs/MacOSX13.0.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers/cblas.h>
+#else
 #include <cblas.h>
-#include <string.h>
+#endif
+
+
+#include <cstring>
 
 // external definitions for mmul's
 extern void my_dgemv(int, double*, double*, double *);
@@ -42,7 +48,7 @@ bool check_accuracy(double *A, double *Anot, int nvalues)
   double eps = 1e-5;
   for (size_t i = 0; i < nvalues; i++) 
   {
-    if (fabsf(A[i] - Anot[i]) > eps) {
+    if (std::abs(A[i] - Anot[i]) > eps) {
        return false;
     }
   }
@@ -59,7 +65,7 @@ int main(int argc, char** argv)
 
     std::vector<int> test_sizes{1024, 2048, 4096, 8192, 16384};
 
-    int n_problems = test_sizes.size();
+    unsigned long n_problems = test_sizes.size();
 
     // preallocate memory buffers for all problems: assume the last number in test_sizes is the largest
 
@@ -91,18 +97,26 @@ int main(int argc, char** argv)
         memcpy((void *)Ycopy, (const void *)Y, sizeof(double)*n);
 
         // insert start timer code here
+        std::chrono::time_point<std::chrono::high_resolution_clock>
+                start_time = std::chrono::high_resolution_clock::now();
 
         // call the method to do the work
         my_dgemv(n, A, X, Y); 
 
         // insert end timer code here, and print out the elapsed time for this problem size
+        std::chrono::time_point<std::chrono::high_resolution_clock>
+                end_time = std::chrono::high_resolution_clock::now();
 
+        std::chrono::duration<double>
+                elapsed = end_time - start_time;
 
-        // now invoke the cblas method to compute the matrix-vector multiplye
+        std::cout << "Elapsed time is: " << elapsed.count() * 1000 << " ms" << std::endl;
+
+        // now invoke the cblas method to compute the matrix-vector multiply
         reference_dgemv(n, Acopy, Xcopy, Ycopy);
 
         // compare your result with that computed by BLAS
-        if (check_accuracy(Ycopy, Y, n) == false)
+        if (!check_accuracy(Ycopy, Y, n))
            printf(" Error: your answer is not the same as that computed by BLAS. \n");
     
     } // end loop over problem sizes
