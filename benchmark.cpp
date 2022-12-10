@@ -24,6 +24,13 @@
 
 #include <cstring>
 
+#define YELLOW  "\033[33m"
+#define GREEN   "\033[32m"
+#define WHITE   "\033[37m"
+#define RESET   "\033[0m"
+
+
+
 // external definitions for mmul's
 extern void my_dgemv(int, double*, double*, double *);
 extern const char* dgemv_desc;
@@ -85,7 +92,7 @@ int main(int argc, char** argv)
     /* For each test size */
     for (int n : test_sizes) 
     {
-        printf("Working on problem size N=%d \n", n);
+        printf("Working on problem size N=%s%d%s \n", YELLOW, n, WHITE);
 
         fill(A, n * n);
         fill(X, n );
@@ -110,7 +117,7 @@ int main(int argc, char** argv)
         std::chrono::duration<double>
                 elapsed = end_time - start_time;
 
-        std::cout << "Elapsed time is: " << elapsed.count() * 1000 << " ms" << std::endl;
+        std::cout << "Elapsed time is: " << GREEN << elapsed.count() * 1000 << WHITE << " ms" << std::endl;
 
         // now invoke the cblas method to compute the matrix-vector multiply
         reference_dgemv(n, Acopy, Xcopy, Ycopy);
